@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import './ParticleBackground.css';
 
 interface Particle {
@@ -17,6 +17,7 @@ const ParticleBackground: React.FC = () => {
   const animationRef = useRef<number>(0);
 
   // Colors for particles
+  // eslint-disable-next-line
   const colors = [
     'rgba(255, 166, 201, opacity)', // Pink
     'rgba(217, 166, 255, opacity)', // Purple
@@ -25,25 +26,32 @@ const ParticleBackground: React.FC = () => {
     'rgba(255, 236, 166, opacity)', // Light Yellow
   ];
 
-  const initCanvas = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  const connectParticles = useCallback((ctx: CanvasRenderingContext2D) => {
+    const maxDistance = 100; // Max distance to draw connections
+    const particleList = particles.current;
+    
+    for (let i = 0; i < particleList.length; i++) {
+      for (let j = i + 1; j < particleList.length; j++) {
+        const dx = particleList[i].x - particleList[j].x;
+        const dy = particleList[i].y - particleList[j].y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < maxDistance) {
+          // The opacity decreases with distance
+          const opacity = 1 - (distance / maxDistance);
+          
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(166, 196, 255, ${opacity * 0.15})`;
+          ctx.lineWidth = 0.5;
+          ctx.moveTo(particleList[i].x, particleList[i].y);
+          ctx.lineTo(particleList[j].x, particleList[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+  }, []);
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Set canvas size to match window
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    // Create initial particles
-    createParticles();
-
-    // Start animation
-    animate();
-  };
-
-  const createParticles = () => {
+  const createParticles = useCallback(() => {
     if (!canvasRef.current) return;
 
     const width = canvasRef.current.width;
@@ -72,9 +80,9 @@ const ParticleBackground: React.FC = () => {
         alpha
       });
     }
-  };
+  }, [colors]);
 
-  const animate = () => {
+  const animate = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -108,41 +116,34 @@ const ParticleBackground: React.FC = () => {
 
     // Continue animation
     animationRef.current = requestAnimationFrame(animate);
-  };
+  }, [connectParticles]);
 
-  const connectParticles = (ctx: CanvasRenderingContext2D) => {
-    const maxDistance = 100; // Max distance to draw connections
-    const particleList = particles.current;
-    
-    for (let i = 0; i < particleList.length; i++) {
-      for (let j = i + 1; j < particleList.length; j++) {
-        const dx = particleList[i].x - particleList[j].x;
-        const dy = particleList[i].y - particleList[j].y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance < maxDistance) {
-          // The opacity decreases with distance
-          const opacity = 1 - (distance / maxDistance);
-          
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(166, 196, 255, ${opacity * 0.15})`;
-          ctx.lineWidth = 0.5;
-          ctx.moveTo(particleList[i].x, particleList[i].y);
-          ctx.lineTo(particleList[j].x, particleList[j].y);
-          ctx.stroke();
-        }
-      }
-    }
-  };
-
-  // Handle resize
-  const handleResize = () => {
+  // Handle resize with useCallback
+  const handleResize = useCallback(() => {
     if (canvasRef.current) {
       canvasRef.current.width = window.innerWidth;
       canvasRef.current.height = window.innerHeight;
       createParticles();
     }
-  };
+  }, [createParticles]);
+
+  const initCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Set canvas size to match window
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Create initial particles
+    createParticles();
+
+    // Start animation
+    animate();
+  }, [createParticles, animate]);
 
   useEffect(() => {
     initCanvas();
@@ -153,7 +154,7 @@ const ParticleBackground: React.FC = () => {
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationRef.current);
     };
-  }, []);
+  }, [handleResize, initCanvas]);
 
   return <canvas ref={canvasRef} className="particle-background" />;
 };
