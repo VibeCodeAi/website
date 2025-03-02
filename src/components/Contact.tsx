@@ -67,7 +67,7 @@ const Contact: React.FC = () => {
                 </div>
                 <div className="contact-item">
                   <span className="contact-icon">📍</span>
-                  <span className="contact-text">GPU, RAM and CPU</span>
+                  <span className="contact-text">GPU</span>
                 </div>
               </div>
               

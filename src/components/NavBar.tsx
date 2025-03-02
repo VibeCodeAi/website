@@ -41,7 +41,7 @@ const NavBar: React.FC = () => {
           <a href="#contact" className="nav-link">Contact</a> */}
         </div>
 
-        <a href="#contact" className="nav-link">Get in Touch</a>
+        <a href="#contact" className="contact-button">Get in Touch</a>
 
         <div className="mobile-menu-toggle" onClick={toggleMobileMenu}>
           <div className={`hamburger ${mobileMenuOpen ? 'open' : ''}`}>
@@ -56,10 +56,10 @@ const NavBar: React.FC = () => {
       <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
         <a href="#home" className="mobile-link" onClick={() => setMobileMenuOpen(false)}>Home</a>
         <a href="#services" className="mobile-link" onClick={() => setMobileMenuOpen(false)}>Services</a>
-        <a href="#about" className="mobile-link" onClick={() => setMobileMenuOpen(false)}>About</a>
+        {/* <a href="#about" className="mobile-link" onClick={() => setMobileMenuOpen(false)}>About</a>
         <a href="#portfolio" className="mobile-link" onClick={() => setMobileMenuOpen(false)}>Portfolio</a>
-        <a href="#contact" className="mobile-link" onClick={() => setMobileMenuOpen(false)}>Contact</a>
-        <button className="contact-button mobile">Get in Touch</button>
+        <a href="#contact" className="mobile-link" onClick={() => setMobileMenuOpen(false)}>Contact</a> */}
+        <a href="#contact" className="contact-button mobile">Get in Touch</a>
       </div>
     </nav>
   );
